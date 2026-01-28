@@ -537,3 +537,88 @@ button:disabled {
     align-items: stretch;
   }
 }
+
+.dork-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.region-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.region-badge.uk {
+  background: #1f4d2f;
+  color: #4caf50;
+}
+
+.region-badge.eu {
+  background: #1f3d4d;
+  color: #4a9eff;
+}
+
+.region-badge.global {
+  background: #3a3f5a;
+  color: #a0a0b0;
+}
+
+.region-badge.us {
+  background: #4d1f1f;
+  color: #ff6b6b;
+}
+
+.priority-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.priority-badge.high {
+  background: #ffc107;
+  color: #000;
+}
+
+.priority-badge.medium {
+  background: #667eea;
+  color: #fff;
+}
+
+.priority-badge.low {
+  background: #6a6f8a;
+  color: #fff;
+}
+
+.dork-desc {
+  color: #a0a0b0;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.dork-item.priority-high {
+  border-left: 4px solid #ffc107;
+}
+
+.dork-item.priority-medium {
+  border-left: 4px solid #667eea;
+}
+
+.dork-item.priority-low {
+  border-left: 4px solid #6a6f8a;
+}
+
+.source-item {
+  background: #1a1f3a;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 8px 0;
+  color: #d0d0e0;
+}
+
+.breach-sources {
+  margin-bottom: 20px;
+}

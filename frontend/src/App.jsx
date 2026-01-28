@@ -12,7 +12,6 @@ function App() {
   const handleInvestigate = async (e) => {
     e.preventDefault();
     
-    // Validate at least one search method
     if (!email.trim() && !(firstName.trim() && lastName.trim())) {
       setError('Please provide either an email address OR both first and last name');
       return;
@@ -113,12 +112,11 @@ function App() {
             {/* Name Results */}
             {results.name_results && (
               <>
-                {/* Email-Name Match */}
                 {results.name_results.email_match && (
                   <div className="section">
-                    <h3>🔗 Email-Name Match Analysis</h3>
+                    <h3>🔗 Email-Name Match</h3>
                     <div className={`confidence-badge ${results.name_results.email_match.confidence.toLowerCase()}`}>
-                      Confidence: {results.name_results.email_match.confidence}
+                      {results.name_results.email_match.confidence} Confidence
                     </div>
                     <ul>
                       {results.name_results.email_match.details.map((detail, i) => (
@@ -128,121 +126,159 @@ function App() {
                   </div>
                 )}
 
-                {/* Potential Emails */}
-                <div className="section">
-                  <h3>📧 Potential Email Addresses</h3>
-                  <p className="detail">{results.name_results.potential_emails.note}</p>
-                  <div className="email-list">
-                    {results.name_results.potential_emails.patterns.map((email, i) => (
-                      <div key={i} className="email-item">{email}</div>
-                    ))}
+                {results.name_results.potential_emails && (
+                  <div className="section">
+                    <h3>📧 Potential Emails</h3>
+                    <p className="detail">{results.name_results.potential_emails.note}</p>
+                    <div className="email-list">
+                      {results.name_results.potential_emails.patterns.map((email, i) => (
+                        <div key={i} className="email-item">{email}</div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Username Variations */}
-                <div className="section">
-                  <h3>🔤 Username Variations</h3>
-                  <div className="username-grid">
-                    {results.name_results.username_variations.map((username, i) => (
-                      <div key={i} className="username-badge">{username}</div>
-                    ))}
+                {results.name_results.username_variations && (
+                  <div className="section">
+                    <h3>🔤 Username Variations</h3>
+                    <div className="username-grid">
+                      {results.name_results.username_variations.map((username, i) => (
+                        <div key={i} className="username-badge">{username}</div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Social Media by Name */}
-                <div className="section">
-                  <h3>📱 Social Media Search</h3>
-                  <p className="detail">{results.name_results.social_media.note}</p>
-                  <div className="platform-grid">
-                    {results.name_results.social_media.platforms.map((platform, i) => (
-                      <div key={i} className="platform-card">
-                        <a href={platform.url} target="_blank" rel="noopener noreferrer">
-                          {platform.name}
-                        </a>
-                        <p className="platform-desc">{platform.description}</p>
+                {results.name_results.social_media && (
+                  <div className="section">
+                    <h3>📱 Social Media</h3>
+                    <p className="detail">{results.name_results.social_media.note}</p>
+                    <div className="platform-grid">
+                      {results.name_results.social_media.platforms.map((platform, i) => (
+                        <div key={i} className="platform-card">
+                          <a href={platform.url} target="_blank" rel="noopener noreferrer">
+                            {platform.name}
+                          </a>
+                          <p className="platform-desc">{platform.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {results.name_results.professional && (
+                  <div className="section">
+                    <h3>💼 Professional</h3>
+                    <div className="platform-grid">
+                      {results.name_results.professional.map((site, i) => (
+                        <div key={i} className="platform-card">
+                          <a href={site.url} target="_blank" rel="noopener noreferrer">
+                            {site.name}
+                          </a>
+                          <p className="platform-desc">{site.type}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {results.name_results.dark_web && (
+                  <div className="section dark-web">
+                    <h3>🕵️ Dark Web</h3>
+                    <p className="detail">{results.name_results.dark_web.note}</p>
+                    <div className="platform-grid">
+                      {results.name_results.dark_web.search_engines.map((engine, i) => (
+                        <div key={i} className="platform-card">
+                          <a href={engine.url} target="_blank" rel="noopener noreferrer">
+                            {engine.name}
+                          </a>
+                          <p className="platform-desc">{engine.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {results.name_results.public_records && (
+                  <div className="section">
+                    <h3>📋 Public Records</h3>
+                    <p className="warning">{results.name_results.public_records.warning}</p>
+                    <div className="platform-grid">
+                      {results.name_results.public_records.databases.map((db, i) => (
+                        <div key={i} className="platform-card">
+                          <a href={db.url} target="_blank" rel="noopener noreferrer">
+                            {db.name}
+                          </a>
+                          <p className="platform-desc">{db.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {results.name_results.google_dorks && (
+                  <div className="section google-dorks">
+                    <h3>🔍 Google Dorks (Name)</h3>
+                    <p className="detail">{results.name_results.google_dorks.note}</p>
+                    
+                    {results.name_results.google_dorks.regions && (
+                      <div className="stats">
+                        🇬🇧 UK/EU: {results.name_results.google_dorks.regions.uk_eu_count} | 
+                        🇺🇸 US: {results.name_results.google_dorks.regions.us_count}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    )}
 
-                {/* Professional Sites */}
-                <div className="section">
-                  <h3>💼 Professional Platforms</h3>
-                  <div className="platform-grid">
-                    {results.name_results.professional.map((site, i) => (
-                      <div key={i} className="platform-card">
-                        <a href={site.url} target="_blank" rel="noopener noreferrer">
-                          {site.name}
-                        </a>
-                        <p className="platform-desc">{site.type}</p>
-                      </div>
-                    ))}
+                    <div className="dork-list">
+                      {results.name_results.google_dorks.dorks.map((dork, i) => (
+                        <div key={i} className={`dork-item priority-${dork.priority}`}>
+                          <div className="dork-header">
+                            <span className={`region-badge ${dork.region.toLowerCase()}`}>
+                              {dork.region}
+                            </span>
+                            <span className={`priority-badge ${dork.priority}`}>
+                              {dork.priority}
+                            </span>
+                          </div>
+                          <code>{dork.query}</code>
+                          <p className="dork-desc">{dork.description}</p>
+                          <a 
+                            href={`https://www.google.com/search?q=${encodeURIComponent(dork.query)}`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="search-btn"
+                          >
+                            Search
+                          </a>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-
-                {/* Public Records */}
-                <div className="section">
-                  <h3>📋 Public Records Databases</h3>
-                  <p className="warning">{results.name_results.public_records.warning}</p>
-                  <div className="platform-grid">
-                    {results.name_results.public_records.databases.map((db, i) => (
-                      <div key={i} className="platform-card">
-                        <a href={db.url} target="_blank" rel="noopener noreferrer">
-                          {db.name}
-                        </a>
-                        <p className="platform-desc">{db.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Google Dorks for Name */}
-                <div className="section google-dorks">
-                  <h3>🔍 Google Dork Queries (Name)</h3>
-                  <p className="detail">{results.name_results.google_dorks.note}</p>
-                  <div className="dork-list">
-                    {results.name_results.google_dorks.dorks.map((dork, i) => (
-                      <div key={i} className="dork-item">
-                        <code>{dork}</code>
-                        <a 
-                          href={`https://www.google.com/search?q=${encodeURIComponent(dork)}`}
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="search-btn"
-                        >
-                          Search
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )}
               </>
             )}
 
-            {/* Email Results (existing code) */}
+            {/* Email Results */}
             {results.email_results && (
               <>
-                {/* Reputation Score */}
                 {results.email_results.reputation && !results.email_results.reputation.error && (
                   <div className="section reputation">
-                    <h3>📊 Email Reputation</h3>
+                    <h3>📊 Reputation</h3>
                     <div className={`reputation-badge ${results.email_results.reputation.reputation}`}>
                       {results.email_results.reputation.reputation?.toUpperCase() || 'UNKNOWN'}
                     </div>
                     {results.email_results.reputation.suspicious && (
-                      <p className="warning">⚠️ Flagged as suspicious</p>
+                      <p className="warning">⚠️ Suspicious</p>
                     )}
-                    <p>References found: {results.email_results.reputation.references || 0}</p>
+                    <p>References: {results.email_results.reputation.references || 0}</p>
                   </div>
                 )}
 
-                {/* Paste Sites */}
                 {results.email_results.paste_sites && (
                   <div className="section dark-web">
-                    <h3>📋 Paste Site Mentions</h3>
+                    <h3>📋 Paste Sites</h3>
                     {results.email_results.paste_sites.total_found > 0 ? (
                       <>
-                        <p className="warning">⚠️ Found in {results.email_results.paste_sites.total_found} paste dumps!</p>
+                        <p className="warning">⚠️ Found in {results.email_results.paste_sites.total_found} pastes!</p>
                         <div className="paste-list">
                           {results.email_results.paste_sites.found_pastes.map((paste, i) => (
                             <div key={i} className="paste-item">
@@ -255,57 +291,99 @@ function App() {
                         </div>
                       </>
                     ) : (
-                      <p className="success">✅ No paste site mentions found</p>
+                      <p className="success">✅ No pastes found</p>
                     )}
                   </div>
                 )}
 
-                {/* Data Breaches */}
-                <div className="section">
-                  <h3>🔒 Data Breaches</h3>
-                  {results.email_results.breaches.found ? (
-                    <div className="breach-info">
-                      <p className="warning">⚠️ Found in {results.email_results.breaches.count} breaches!</p>
+                {results.email_results.breaches && (
+                  <div className="section">
+                    <h3>🔒 Data Breaches</h3>
+                    <div className="breach-sources">
+                      {results.email_results.breaches.details && results.email_results.breaches.details.map((source, i) => (
+                        <div key={i} className="source-item">
+                          <strong>{source.source}:</strong> {source.status}
+                          {source.count > 0 && <span> ({source.count} breaches)</span>}
+                        </div>
+                      ))}
+                    </div>
+                    {results.email_results.breaches.found && results.email_results.breaches.breaches_found.length > 0 ? (
                       <div className="breach-list">
-                        {results.email_results.breaches.breaches?.map((breach, i) => (
+                        {results.email_results.breaches.breaches_found.map((breach, i) => (
                           <div key={i} className="breach-item">
                             <h4>{breach.name}</h4>
-                            <p className="breach-date">Date: {breach.date}</p>
-                            <p className="breach-data">
-                              Compromised: {breach.data?.join(', ') || 'Unknown'}
-                            </p>
+                            <p className="breach-date">{breach.date}</p>
+                            <p className="breach-data">{breach.data?.join(', ')}</p>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  ) : (
-                    <p className="success">✅ No breaches found</p>
-                  )}
-                </div>
-
-                {/* Social Media (Email-based) */}
-                <div className="section">
-                  <h3>📱 Social Media Presence (Email)</h3>
-                  <p className="stats">
-                    Verified: {results.email_results.social_media.verified_found} accounts found
-                  </p>
-                  <div className="platform-grid">
-                    {results.email_results.social_media.platforms?.map((platform, i) => (
-                      <div key={i} className={`platform-card ${platform.status}`}>
-                        <a href={platform.url} target="_blank" rel="noopener noreferrer">
-                          {platform.name} {platform.status === 'found' && '✅'}
-                          {platform.status === 'not_found' && '❌'}
-                          {platform.status === 'check_manually' && '🔍'}
-                        </a>
-                      </div>
-                    ))}
+                    ) : (
+                      <p className="success">✅ No breaches found</p>
+                    )}
                   </div>
-                </div>
+                )}
+
+                {results.email_results.social_media && (
+                  <div className="section">
+                    <h3>📱 Social Media</h3>
+                    <p className="stats">Verified: {results.email_results.social_media.verified_found}</p>
+                    <div className="platform-grid">
+                      {results.email_results.social_media.platforms?.map((platform, i) => (
+                        <div key={i} className={`platform-card ${platform.status}`}>
+                          <a href={platform.url} target="_blank" rel="noopener noreferrer">
+                            {platform.name} {platform.status === 'found' && '✅'}
+                            {platform.status === 'not_found' && '❌'}
+                            {platform.status === 'check_manually' && '🔍'}
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {results.email_results.google_dorks && (
+                  <div className="section google-dorks">
+                    <h3>🔍 Google Dorks (Email)</h3>
+                    <p className="detail">{results.email_results.google_dorks.note}</p>
+                    
+                    {results.email_results.google_dorks.regions && (
+                      <div className="stats">
+                        🇬🇧 UK/EU: {results.email_results.google_dorks.regions.uk_eu_count} | 
+                        🇺🇸 US: {results.email_results.google_dorks.regions.us_count}
+                      </div>
+                    )}
+
+                    <div className="dork-list">
+                      {results.email_results.google_dorks.dorks.map((dork, i) => (
+                        <div key={i} className={`dork-item priority-${dork.priority}`}>
+                          <div className="dork-header">
+                            <span className={`region-badge ${dork.region.toLowerCase()}`}>
+                              {dork.region}
+                            </span>
+                            <span className={`priority-badge ${dork.priority}`}>
+                              {dork.priority}
+                            </span>
+                          </div>
+                          <code>{dork.query}</code>
+                          <p className="dork-desc">{dork.description}</p>
+                          <a 
+                            href={`https://www.google.com/search?q=${encodeURIComponent(dork.query)}`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="search-btn"
+                          >
+                            Search
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             )}
 
             <div className="footer-note">
-              <p>⚠️ This tool is for educational and ethical OSINT purposes only. Always respect privacy and legal boundaries.</p>
+              <p>⚠️ Educational purposes only. Respect privacy and legal boundaries.</p>
             </div>
           </div>
         )}
