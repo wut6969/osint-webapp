@@ -1,11 +1,13 @@
 import requests
 import re
+import time
 
 def get_google_result_count(query):
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
         url = f'https://www.google.com/search?q={query}'
         response = requests.get(url, headers=headers, timeout=8)
+        time.sleep(0.5)
         
         if response.status_code == 200:
             match = re.search(r'About ([\d,]+) results', response.text)
@@ -46,13 +48,14 @@ def generate_google_dorks_with_preview(email_or_name, is_email=True):
             {'query': f'"{email_or_name}" site:.com', 'description': 'US domains', 'priority': 'low', 'region': 'US'}
         ]
     
-    for dork in dorks[:3]:
+    # Get result counts for ALL dorks
+    for dork in dorks:
         dork['result_count'] = get_google_result_count(dork['query'])
     
     return {
         'dorks': dorks,
         'google_search_url': f'https://www.google.com/search?q={email_or_name}',
-        'note': 'UK/Europe prioritized with result counts',
+        'note': 'UK/Europe prioritized with result counts for all queries',
         'regions': {
             'uk_eu_count': len([d for d in dorks if d['region'] in ['UK', 'EU']]),
             'us_count': len([d for d in dorks if d['region'] == 'US'])
