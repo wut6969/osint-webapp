@@ -1,5 +1,6 @@
 import requests
 import re
+from app.google_search import generate_google_dorks_with_preview
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def investigate_name(first_name, last_name, email=None):
@@ -392,33 +393,8 @@ def search_archives(full_name):
     }
 
 def generate_name_dorks(full_name):
-    """Generate comprehensive Google dork queries"""
-    dorks = [
-        f'"{full_name}"',
-        f'"{full_name}" email',
-        f'"{full_name}" phone',
-        f'"{full_name}" address',
-        f'"{full_name}" site:linkedin.com',
-        f'"{full_name}" site:facebook.com',
-        f'"{full_name}" site:twitter.com',
-        f'"{full_name}" resume OR CV filetype:pdf',
-        f'"{full_name}" "about me"',
-        f'"{full_name}" company OR work',
-        f'"{full_name}" university OR education',
-        f'"{full_name}" arrest OR convicted',
-        f'"{full_name}" obituary',
-        f'"{full_name}" wedding OR marriage',
-        f'"{full_name}" site:pastebin.com',
-        f'"{full_name}" inurl:admin',
-        f'"{full_name}" crypto OR bitcoin',
-        f'"{full_name}" breach OR leak'
-    ]
-    
-    return {
-        'dorks': dorks,
-        'google_search_url': f'https://www.google.com/search?q={full_name.replace(" ", "+")}',
-        'note': 'Advanced search queries for deep research'
-    }
+    """Use new UK/EU focused Google search with previews"""
+    return generate_google_dorks_with_preview(full_name, is_email=False)
 
 def generate_username_variations(first, last):
     """Generate possible username variations"""

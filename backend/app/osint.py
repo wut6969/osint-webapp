@@ -1,6 +1,8 @@
+from app.google_search import generate_google_dorks_with_preview
 import requests
 import re
 from datetime import datetime
+from app.google_search import generate_google_dorks_with_preview
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
@@ -382,23 +384,5 @@ def extract_potential_names(username):
     return potential_names if potential_names else [{'note': 'No obvious name patterns detected'}]
 
 def generate_google_dorks(email):
-    dorks = [
-        f'"{email}"',
-        f'"{email}" site:pastebin.com',
-        f'"{email}" site:linkedin.com',
-        f'"{email}" site:twitter.com',
-        f'"{email}" filetype:pdf',
-        f'"{email}" "password" OR "leaked"',
-        f'"{email}" site:github.com',
-        f'intext:"{email}" site:facebook.com',
-        f'"{email}" inurl:admin',
-        f'"{email}" site:archive.org',
-        f'"{email}" site:reddit.com',
-        f'"{email}" "database" OR "dump"'
-    ]
-    
-    return {
-        'dorks': dorks,
-        'google_search_url': f'https://www.google.com/search?q={email}',
-        'note': 'Advanced search queries'
-    }
+    """Use new UK/EU focused Google search with previews"""
+    return generate_google_dorks_with_preview(email, is_email=True)
