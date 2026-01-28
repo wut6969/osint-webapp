@@ -8,8 +8,6 @@ function App() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [usernameInvestigation, setUsernameInvestigation] = useState(null);
-  const [investigatingUsername, setInvestigatingUsername] = useState(false);
 
   const handleInvestigate = async (e) => {
     e.preventDefault();
@@ -20,7 +18,6 @@ function App() {
     setLoading(true);
     setError('');
     setResults(null);
-    setUsernameInvestigation(null);
     try {
       const response = await fetch('http://localhost:5000/api/investigate', {
         method: 'POST',
@@ -36,24 +33,6 @@ function App() {
     }
   };
 
-  const handleUsernameClick = async (username) => {
-    setInvestigatingUsername(true);
-    setUsernameInvestigation(null);
-    try {
-      const response = await fetch('http://localhost:5000/api/investigate-username', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
-      });
-      const data = await response.json();
-      setUsernameInvestigation(data);
-    } catch (err) {
-      setError('Failed to investigate username');
-    } finally {
-      setInvestigatingUsername(false);
-    }
-  };
-
   return (
     <div className="App">
       <div className="container">
@@ -66,27 +45,57 @@ function App() {
           <button type="submit" disabled={loading}>{loading ? 'Deep Investigating...' : 'Deep Investigate'}</button>
         </form>
         {error && <div className="error">{error}</div>}
-        {usernameInvestigation && (
-          <div className="username-investigation">
-            <h3>🔤 Username: {usernameInvestigation.username}</h3>
-            <div className="probability-section">
-              <div className={`probability-badge ${usernameInvestigation.confidence.toLowerCase()}`}>{usernameInvestigation.probability}% Match Probability</div>
-              <p className="confidence">Confidence: {usernameInvestigation.confidence}</p>
-              <p className="stats">Found: {usernameInvestigation.platforms_found}/{usernameInvestigation.platforms_checked}</p>
-            </div>
-            <div className="platform-grid">
-              {usernameInvestigation.details.map((detail, i) => (
-                <div key={i} className={`platform-card ${detail.status}`}><a href={detail.url} target="_blank" rel="noopener noreferrer">{detail.platform} {detail.status === 'found' && '✅'} {detail.status === 'not_found' && '❌'} {detail.status === 'check_manually' && '🔍'}</a></div>
-              ))}
-            </div>
-          </div>
-        )}
         {results && (
           <div className="results">
             <div className="results-header"><h2>🎯 Investigation Report</h2>{results.email_results && <p className="target-email">{results.email_results.email}</p>}{results.name_results && <p className="target-name">{results.name_results.full_name}</p>}</div>
-            {results.name_results?.username_variations && (<div className="section"><h3>🔤 Username Variations (Click to Investigate)</h3><div className="username-grid">{results.name_results.username_variations.map((username, i) => (<div key={i} className="username-badge clickable" onClick={() => handleUsernameClick(username)}>{username}</div>))}</div>{investigatingUsername && <p className="detail">Investigating username...</p>}</div>)}
-            {results.email_results?.google_dorks && (<div className="section google-dorks"><h3>🔍 Google Dorks (Email)</h3><p className="detail">{results.email_results.google_dorks.note}</p>{results.email_results.google_dorks.regions && (<div className="stats">🇬🇧 UK/EU: {results.email_results.google_dorks.regions.uk_eu_count} | 🇺🇸 US: {results.email_results.google_dorks.regions.us_count}</div>)}<div className="dork-list">{results.email_results.google_dorks.dorks.map((dork, i) => (<div key={i} className={`dork-item priority-${dork.priority}`}><div className="dork-header"><span className={`region-badge ${dork.region.toLowerCase()}`}>{dork.region}</span><span className={`priority-badge ${dork.priority}`}>{dork.priority}</span>{dork.result_count && <span className="result-count">📊 {dork.result_count} results</span>}</div><code>{dork.query}</code><p className="dork-desc">{dork.description}</p><a href={`https://www.google.com/search?q=${encodeURIComponent(dork.query)}`} target="_blank" rel="noopener noreferrer" className="search-btn">Search</a></div>))}</div></div>)}
-            {results.name_results?.google_dorks && (<div className="section google-dorks"><h3>🔍 Google Dorks (Name)</h3><p className="detail">{results.name_results.google_dorks.note}</p>{results.name_results.google_dorks.regions && (<div className="stats">🇬🇧 UK/EU: {results.name_results.google_dorks.regions.uk_eu_count} | 🇺🇸 US: {results.name_results.google_dorks.regions.us_count}</div>)}<div className="dork-list">{results.name_results.google_dorks.dorks.map((dork, i) => (<div key={i} className={`dork-item priority-${dork.priority}`}><div className="dork-header"><span className={`region-badge ${dork.region.toLowerCase()}`}>{dork.region}</span><span className={`priority-badge ${dork.priority}`}>{dork.priority}</span>{dork.result_count && <span className="result-count">📊 {dork.result_count} results</span>}</div><code>{dork.query}</code><p className="dork-desc">{dork.description}</p><a href={`https://www.google.com/search?q=${encodeURIComponent(dork.query)}`} target="_blank" rel="noopener noreferrer" className="search-btn">Search</a></div>))}</div></div>)}
+            
+            {results.name_results?.username_investigations && (
+              <div className="section">
+                <h3>🔤 Username Analysis (Auto-Investigated)</h3>
+                <div className="username-analysis-grid">
+                  {results.name_results.username_investigations.map((investigation, i) => (
+                    <div key={i} className="username-analysis-card">
+                      <div className="username-header">
+                        <span className="username-text">{investigation.username}</span>
+                        <div className={`probability-mini ${investigation.confidence.toLowerCase()}`}>
+                          {investigation.probability}%
+                        </div>
+                      </div>
+                      <div className="confidence-bar">
+                        <div className={`confidence-fill ${investigation.confidence.toLowerCase()}`} style={{width: `${investigation.probability}%`}}></div>
+                      </div>
+                      <p className="confidence-text">{investigation.confidence} Confidence</p>
+                      <p className="platforms-found">Found: {investigation.platforms_found}/{investigation.platforms_checked} platforms</p>
+                      <div className="platform-mini-grid">
+                        {investigation.details.filter(d => d.status === 'found').map((detail, j) => (
+                          <a key={j} href={detail.url} target="_blank" rel="noopener noreferrer" className="platform-mini">
+                            {detail.platform} ✅
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {results.email_results?.google_dorks && (
+              <div className="section google-dorks">
+                <h3>🔍 Google Dorks (Email)</h3>
+                <p className="detail">{results.email_results.google_dorks.note}</p>
+                {results.email_results.google_dorks.regions && (<div className="stats">🇬🇧 UK/EU: {results.email_results.google_dorks.regions.uk_eu_count} | 🇺🇸 US: {results.email_results.google_dorks.regions.us_count}</div>)}
+                <div className="dork-list">{results.email_results.google_dorks.dorks.map((dork, i) => (<div key={i} className={`dork-item priority-${dork.priority}`}><div className="dork-header"><span className={`region-badge ${dork.region.toLowerCase()}`}>{dork.region}</span><span className={`priority-badge ${dork.priority}`}>{dork.priority}</span>{dork.result_count && <span className="result-count">📊 {dork.result_count} results</span>}</div><code>{dork.query}</code><p className="dork-desc">{dork.description}</p><a href={`https://www.google.com/search?q=${encodeURIComponent(dork.query)}`} target="_blank" rel="noopener noreferrer" className="search-btn">Search</a></div>))}</div>
+              </div>
+            )}
+
+            {results.name_results?.google_dorks && (
+              <div className="section google-dorks">
+                <h3>🔍 Google Dorks (Name)</h3>
+                <p className="detail">{results.name_results.google_dorks.note}</p>
+                {results.name_results.google_dorks.regions && (<div className="stats">🇬🇧 UK/EU: {results.name_results.google_dorks.regions.uk_eu_count} | 🇺🇸 US: {results.name_results.google_dorks.regions.us_count}</div>)}
+                <div className="dork-list">{results.name_results.google_dorks.dorks.map((dork, i) => (<div key={i} className={`dork-item priority-${dork.priority}`}><div className="dork-header"><span className={`region-badge ${dork.region.toLowerCase()}`}>{dork.region}</span><span className={`priority-badge ${dork.priority}`}>{dork.priority}</span>{dork.result_count && <span className="result-count">📊 {dork.result_count} results</span>}</div><code>{dork.query}</code><p className="dork-desc">{dork.description}</p><a href={`https://www.google.com/search?q=${encodeURIComponent(dork.query)}`} target="_blank" rel="noopener noreferrer" className="search-btn">Search</a></div>))}</div>
+              </div>
+            )}
           </div>
         )}
       </div>

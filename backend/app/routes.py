@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.osint import investigate_email
 from app.name_osint import investigate_name, investigate_username_deep
+from concurrent.futures import ThreadPoolExecutor
 
 bp = Blueprint('main', __name__)
 
@@ -20,7 +21,25 @@ def investigate():
         results['email_results'] = investigate_email(email)
     
     if first_name and last_name:
-        results['name_results'] = investigate_name(first_name, last_name, email if email else None)
+        name_results = investigate_name(first_name, last_name, email if email else None)
+        
+        # Auto-investigate all username variations
+        if 'username_variations' in name_results:
+            username_investigations = []
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                futures = {executor.submit(investigate_username_deep, username): username 
+                          for username in name_results['username_variations'][:5]}  # Limit to 5
+                
+                for future in futures:
+                    try:
+                        result = future.result()
+                        username_investigations.append(result)
+                    except:
+                        pass
+            
+            name_results['username_investigations'] = username_investigations
+        
+        results['name_results'] = name_results
     
     return jsonify(results)
 

@@ -708,3 +708,118 @@ button:disabled {
 .platform-card.verification-not_checked {
   border: 2px solid #3a3f5a;
 }
+
+.username-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.username-analysis-card {
+  background: #1a1f3a;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #3a3f5a;
+  transition: all 0.3s;
+}
+
+.username-analysis-card:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.username-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.username-text {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 1.1rem;
+}
+
+.probability-mini {
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.probability-mini.high {
+  background: #1f4d2f;
+  color: #4caf50;
+}
+
+.probability-mini.medium {
+  background: #4d3d1f;
+  color: #ffc107;
+}
+
+.probability-mini.low {
+  background: #4d1f1f;
+  color: #ff6b6b;
+}
+
+.confidence-bar {
+  width: 100%;
+  height: 8px;
+  background: #2a2f4a;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.confidence-fill {
+  height: 100%;
+  transition: width 0.5s;
+}
+
+.confidence-fill.high {
+  background: #4caf50;
+}
+
+.confidence-fill.medium {
+  background: #ffc107;
+}
+
+.confidence-fill.low {
+  background: #ff6b6b;
+}
+
+.confidence-text {
+  color: #a0a0b0;
+  font-size: 0.85rem;
+  margin: 5px 0;
+}
+
+.platforms-found {
+  color: #d0d0e0;
+  font-size: 0.9rem;
+  margin: 10px 0;
+}
+
+.platform-mini-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.platform-mini {
+  background: #252b45;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #4caf50;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.platform-mini:hover {
+  background: #667eea;
+  color: white;
+}
