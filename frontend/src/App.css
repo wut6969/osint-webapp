@@ -853,3 +853,30 @@ button:disabled {
   font-weight: 600;
   font-size: 1.1rem;
 }
+
+.source-item {
+  background: #1a1f3a;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 8px 0;
+  color: #d0d0e0;
+  cursor: default;
+}
+
+.source-item.clickable {
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1px solid #3a3f5a;
+}
+
+.source-item.clickable:hover {
+  border-color: #667eea;
+  background: #252b45;
+  transform: translateX(5px);
+}
+
+.source-item a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}

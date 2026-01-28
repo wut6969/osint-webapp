@@ -34,14 +34,14 @@ def investigate_email(email):
 
 def check_multiple_breach_sources(email):
     results = {
-        'sources_checked': 8,
+        'sources_checked': 6,
         'breaches_found': [],
         'total_breaches': 0,
         'details': [],
         'found': False
     }
     
-    # Source 1: HaveIBeenPwned
+    # Source 1: HaveIBeenPwned (Free)
     hibp = check_haveibeenpwned(email)
     if hibp.get('found'):
         results['breaches_found'].extend(hibp.get('breaches', []))
@@ -49,32 +49,25 @@ def check_multiple_breach_sources(email):
     else:
         results['details'].append({'source': 'HaveIBeenPwned', 'status': '✅ Clean' if not hibp.get('error') else '⚠️ ' + hibp.get('error', 'Error'), 'count': 0})
     
-    # Source 2: LeakCheck
+    # Source 2: LeakCheck (Free)
     leakcheck = check_leakcheck(email)
     if leakcheck.get('found'):
         results['details'].append({'source': 'LeakCheck', 'status': '✅ Found', 'count': leakcheck.get('count', 0), 'url': leakcheck.get('url')})
     else:
         results['details'].append({'source': 'LeakCheck', 'status': '✅ Clean', 'count': 0})
     
-    # Source 3: DeHashed
-    results['details'].append({'source': 'DeHashed', 'status': '🔍 Check Manually', 'url': f'https://dehashed.com/search?query={email}'})
-    
-    # Source 4: BreachDirectory
+    # Source 3: BreachDirectory (Free)
     breach_dir = check_breach_directory(email)
-    results['details'].append({'source': 'BreachDirectory', 'status': breach_dir.get('status'), 'url': breach_dir.get('url')})
+    results['details'].append({'source': 'BreachDirectory', 'status': breach_dir.get('status'), 'url': breach_dir.get('url'), 'clickable': True})
     
-    # Source 5: Snusbase
-    results['details'].append({'source': 'Snusbase', 'status': '🔍 Check Manually', 'url': f'https://snusbase.com/search/{email}'})
+    # Source 4: IntelligenceX (Free search)
+    results['details'].append({'source': 'IntelligenceX', 'status': '🔍 Check Manually', 'url': f'https://intelx.io/?s={email}', 'clickable': True})
     
-    # Source 6: IntelligenceX
-    intelx = check_intelligence_x(email)
-    results['details'].append({'source': 'IntelligenceX', 'status': intelx.get('status'), 'url': intelx.get('url')})
+    # Source 5: Hudson Rock (Free API)
+    results['details'].append({'source': 'Hudson Rock', 'status': '🔍 Check Manually', 'url': f'https://cavalier.hudsonrock.com/api/json/v2/osint-tools/search-by-email?email={email}', 'clickable': True})
     
-    # Source 7: Hudson Rock
-    results['details'].append({'source': 'Hudson Rock', 'status': '🔍 Check Manually', 'url': f'https://cavalier.hudsonrock.com/api/json/v2/osint-tools/search-by-email?email={email}'})
-    
-    # Source 8: Leaked Source
-    results['details'].append({'source': 'LeakedSource', 'status': '🔍 Check Manually', 'url': 'https://leakedsource.ru/'})
+    # Source 6: LeakedSource (Free search)
+    results['details'].append({'source': 'LeakedSource', 'status': '🔍 Check Manually', 'url': 'https://leakedsource.ru/', 'clickable': True})
     
     results['total_breaches'] = len(results['breaches_found'])
     results['found'] = results['total_breaches'] > 0
@@ -91,9 +84,6 @@ def check_breach_directory(email):
         return {'status': '✅ Clean', 'url': f'https://breachdirectory.org/?q={email}'}
     except:
         return {'status': '🔍 Check Manually', 'url': f'https://breachdirectory.org/?q={email}'}
-
-def check_intelligence_x(email):
-    return {'status': '🔍 Check Manually', 'url': f'https://intelx.io/?s={email}'}
 
 def check_haveibeenpwned(email):
     try:
@@ -153,22 +143,18 @@ def check_dark_web_mentions(email):
     return {
         'intelligence_x_url': f'https://intelx.io/?s={email}',
         'search_engines': [
-            {'name': 'Intelligence X', 'url': f'https://intelx.io/?s={email}', 'description': 'Dark web search'},
-            {'name': 'DarkSearch', 'url': f'https://darksearch.io/?query={email}', 'description': 'Tor search'},
-            {'name': 'Ahmia', 'url': f'https://ahmia.fi/search/?q={email}', 'description': 'Hidden services'},
-            {'name': 'Onion Search', 'url': f'https://onionsearchengine.com/search.php?search={email}', 'description': 'Onion sites'},
-            {'name': 'Torch', 'url': f'http://torchdeedp3i2jigzjdmfpn5ttjhthh5wbmda2rr3jvqjg5p77c54dqd.onion', 'description': 'Tor search (Tor required)'},
+            {'name': 'Intelligence X', 'url': f'https://intelx.io/?s={email}', 'description': 'Dark web search (Free)', 'clickable': True},
+            {'name': 'DarkSearch', 'url': f'https://darksearch.io/?query={email}', 'description': 'Tor search (Free)', 'clickable': True},
+            {'name': 'Ahmia', 'url': f'https://ahmia.fi/search/?q={email}', 'description': 'Hidden services (Free)', 'clickable': True},
+            {'name': 'Onion Search', 'url': f'https://onionsearchengine.com/search.php?search={email}', 'description': 'Onion sites (Free)', 'clickable': True},
         ],
         'leak_databases': [
-            {'name': 'DeHashed', 'url': f'https://dehashed.com/search?query={email}', 'note': '$4.99/month'},
-            {'name': 'LeakCheck', 'url': f'https://leakcheck.io/search?query={email}', 'note': 'Free basic'},
-            {'name': 'Snusbase', 'url': f'https://snusbase.com/search/{email}', 'note': 'Paid'},
-            {'name': 'BreachDirectory', 'url': f'https://breachdirectory.org/?q={email}', 'note': 'Free search'},
-            {'name': 'LeakedSource', 'url': 'https://leakedsource.ru/', 'note': 'Russian database'},
-            {'name': 'Hudson Rock', 'url': f'https://cavalier.hudsonrock.com/api/json/v2/osint-tools/search-by-email?email={email}', 'note': 'Infostealer logs'},
-            {'name': 'Weleakinfo', 'url': f'https://weleakinfo.to/v2/search?email={email}', 'note': 'Paid'},
+            {'name': 'LeakCheck', 'url': f'https://leakcheck.io/search?query={email}', 'note': 'Free basic', 'clickable': True},
+            {'name': 'BreachDirectory', 'url': f'https://breachdirectory.org/?q={email}', 'note': 'Free search', 'clickable': True},
+            {'name': 'LeakedSource', 'url': 'https://leakedsource.ru/', 'note': 'Free Russian DB', 'clickable': True},
+            {'name': 'Hudson Rock', 'url': f'https://cavalier.hudsonrock.com/api/json/v2/osint-tools/search-by-email?email={email}', 'note': 'Free infostealer logs', 'clickable': True},
         ],
-        'note': 'Manual verification required'
+        'note': 'All sources are free - click to check manually'
     }
 
 def verify_profile_exists(platform_name, url, username):
