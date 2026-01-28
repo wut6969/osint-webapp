@@ -436,3 +436,8 @@ def check_name_email_match(first, last, email):
         'details': matches if matches else ['No obvious name-email pattern match'],
         'confidence': 'High' if len(matches) >= 2 else 'Medium' if len(matches) == 1 else 'Low'
     }
+
+from app.username_checker import check_username_probability
+
+def investigate_username_deep(username):
+    return check_username_probability(username)
