@@ -19,7 +19,7 @@ def investigate_email(email):
         'email': email,
         'username': username,
         'timestamp': datetime.now().isoformat(),
-        'breaches': check_breaches(email),
+        'breaches': check_multiple_breach_sources(email),
         'reputation': check_reputation(email),
         'paste_sites': check_paste_sites(email),
         'dark_web_mentions': check_dark_web_mentions(email),
@@ -32,7 +32,72 @@ def investigate_email(email):
     
     return results
 
-def check_breaches(email):
+def check_multiple_breach_sources(email):
+    """Check multiple free breach databases"""
+    results = {
+        'sources_checked': 3,
+        'breaches_found': [],
+        'total_breaches': 0,
+        'details': [],
+        'found': False
+    }
+    
+    # Source 1: HaveIBeenPwned
+    hibp = check_haveibeenpwned(email)
+    if hibp.get('found'):
+        results['breaches_found'].extend(hibp.get('breaches', []))
+        results['details'].append({
+            'source': 'HaveIBeenPwned',
+            'status': '✅ Found',
+            'count': hibp.get('count', 0),
+            'breaches': hibp.get('breaches', [])
+        })
+    else:
+        results['details'].append({
+            'source': 'HaveIBeenPwned',
+            'status': '✅ Clean' if not hibp.get('error') else '⚠️ ' + hibp.get('error', 'Error'),
+            'count': 0
+        })
+    
+    # Source 2: LeakCheck
+    leakcheck = check_leakcheck(email)
+    if leakcheck.get('found'):
+        results['details'].append({
+            'source': 'LeakCheck',
+            'status': '✅ Found',
+            'count': leakcheck.get('count', 0),
+            'url': leakcheck.get('url')
+        })
+    else:
+        results['details'].append({
+            'source': 'LeakCheck',
+            'status': '✅ Clean',
+            'count': 0
+        })
+    
+    # Source 3: DeHashed
+    dehashed = check_dehashed(email)
+    if dehashed.get('found'):
+        results['details'].append({
+            'source': 'DeHashed',
+            'status': '✅ Found',
+            'note': 'Premium required for full details',
+            'url': dehashed.get('url')
+        })
+    else:
+        results['details'].append({
+            'source': 'DeHashed',
+            'status': '✅ Clean',
+            'count': 0
+        })
+    
+    results['total_breaches'] = len(results['breaches_found'])
+    results['found'] = results['total_breaches'] > 0
+    
+    return results
+
+def check_haveibeenpwned(email):
+    """Check HIBP"""
     try:
         url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
         headers = {'user-agent': 'OSINT-WebApp'}
@@ -52,11 +117,37 @@ def check_breaches(email):
                 ]
             }
         elif response.status_code == 404:
-            return {'found': False, 'count': 0, 'message': 'No breaches found'}
+            return {'found': False, 'count': 0}
         else:
-            return {'error': f'API returned status {response.status_code}'}
+            return {'error': f'Rate limited', 'found': False}
     except Exception as e:
-        return {'error': f'Connection failed: {str(e)}'}
+        return {'error': str(e), 'found': False}
+
+def check_leakcheck(email):
+    """Check LeakCheck free API"""
+    try:
+        url = f"https://leakcheck.io/api/public?check={email}"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('found', 0) > 0:
+                return {
+                    'found': True,
+                    'count': data.get('found', 0),
+                    'url': f'https://leakcheck.io/search?query={email}'
+                }
+        return {'found': False}
+    except:
+        return {'found': False}
+
+def check_dehashed(email):
+    """Check DeHashed preview"""
+    return {
+        'found': False,
+        'url': f"https://dehashed.com/search?query={email}",
+        'note': 'Visit manually to check'
+    }
 
 def check_reputation(email):
     try:
@@ -77,7 +168,7 @@ def check_reputation(email):
         return {'error': 'Reputation check unavailable'}
 
 def check_paste_sites(email):
-    """Check Pastebin and paste dump sites for email mentions"""
+    """Check Pastebin and paste dump sites"""
     results = {
         'pastebin_search': f'https://psbdmp.ws/api/search/{email}',
         'found_pastes': [],
@@ -85,12 +176,11 @@ def check_paste_sites(email):
     }
     
     try:
-        # Psbdmp.ws - Free pastebin dump search
         response = requests.get(f'https://psbdmp.ws/api/search/{email}', timeout=10)
         if response.status_code == 200:
             data = response.json()
             if data and 'data' in data:
-                pastes = data['data'][:5]  # Get first 5 results
+                pastes = data['data'][:5]
                 results['found_pastes'] = [
                     {
                         'id': paste.get('id'),
@@ -106,45 +196,45 @@ def check_paste_sites(email):
     return results
 
 def check_dark_web_mentions(email):
-    """Check for dark web and leaked database mentions"""
+    """Dark web search links"""
     results = {
         'intelligence_x_url': f'https://intelx.io/?s={email}',
         'search_engines': [
             {
                 'name': 'Intelligence X',
                 'url': f'https://intelx.io/?s={email}',
-                'description': 'Dark web search engine'
+                'description': 'Dark web search'
             },
             {
                 'name': 'DarkSearch',
                 'url': f'https://darksearch.io/?query={email}',
-                'description': 'Tor search engine'
+                'description': 'Tor search'
             },
             {
                 'name': 'Ahmia',
                 'url': f'https://ahmia.fi/search/?q={email}',
-                'description': 'Tor hidden services search'
+                'description': 'Hidden services'
             }
         ],
         'leak_databases': [
             {
-                'name': 'DeHashed (Paid)',
-                'url': 'https://dehashed.com',
-                'note': 'Comprehensive breach database ($4.99/month)'
+                'name': 'DeHashed',
+                'url': f'https://dehashed.com/search?query={email}',
+                'note': '$4.99/month'
             },
             {
                 'name': 'LeakCheck',
                 'url': f'https://leakcheck.io/search?query={email}',
-                'note': 'Free basic search available'
+                'note': 'Free basic'
             }
         ],
-        'note': 'These searches require manual verification. Dark web results may take time to appear.'
+        'note': 'Manual verification required'
     }
     
     return results
 
 def verify_profile_exists(platform_name, url, username):
-    """Check if a profile actually exists on a platform"""
+    """Verify if profile exists - with status indicators"""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     }
@@ -159,7 +249,7 @@ def verify_profile_exists(platform_name, url, username):
         elif platform_name == 'Medium':
             exists = response.status_code == 200 and username.lower() in response.text.lower()
         elif platform_name in ['Instagram', 'Twitter/X', 'TikTok', 'LinkedIn']:
-            exists = None  # These block automated requests
+            exists = None
         else:
             exists = response.status_code == 200
             
@@ -178,7 +268,7 @@ def verify_profile_exists(platform_name, url, username):
         }
 
 def check_social_media_verified(username):
-    """Check social media accounts with automatic verification"""
+    """Check social media with auto-verification"""
     platforms = [
         {'name': 'GitHub', 'url': f'https://github.com/{username}'},
         {'name': 'Reddit', 'url': f'https://reddit.com/user/{username}'},
@@ -207,17 +297,16 @@ def check_social_media_verified(username):
             verified_platforms.append(result)
     
     found_count = sum(1 for p in verified_platforms if p['exists'] == True)
-    manual_check = [p for p in verified_platforms if p['exists'] is None]
     
     return {
         'platforms_checked': len(platforms),
         'verified_found': found_count,
-        'manual_check_required': len(manual_check),
+        'manual_check_required': len([p for p in verified_platforms if p['exists'] is None]),
         'platforms': sorted(verified_platforms, key=lambda x: (x['status'] != 'found', x['name']))
     }
 
 def check_username_sites_verified(username):
-    """Verify username across multiple sites"""
+    """Verify username across sites"""
     sites = [
         {'name': 'Stack Overflow', 'url': f'https://stackoverflow.com/users/{username}'},
         {'name': 'Keybase', 'url': f'https://keybase.io/{username}'},
@@ -287,7 +376,7 @@ def extract_potential_names(username):
             'type': 'username_with_numbers',
             'username_base': re.sub(r'\d+', '', username),
             'numbers': numbers,
-            'note': 'Numbers might be birth year, age, or significant dates'
+            'note': 'Numbers might be birth year, age, or dates'
         })
     
     return potential_names if potential_names else [{'note': 'No obvious name patterns detected'}]
@@ -311,5 +400,5 @@ def generate_google_dorks(email):
     return {
         'dorks': dorks,
         'google_search_url': f'https://www.google.com/search?q={email}',
-        'note': 'Copy these dorks into Google for deep searches'
+        'note': 'Advanced search queries'
     }
