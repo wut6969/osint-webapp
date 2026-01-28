@@ -1,8 +1,6 @@
-from app.google_search import generate_google_dorks_with_preview
 import requests
 import re
 from datetime import datetime
-from app.google_search import generate_google_dorks_with_preview
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
@@ -35,7 +33,6 @@ def investigate_email(email):
     return results
 
 def check_multiple_breach_sources(email):
-    """Check multiple free breach databases"""
     results = {
         'sources_checked': 3,
         'breaches_found': [],
@@ -44,7 +41,6 @@ def check_multiple_breach_sources(email):
         'found': False
     }
     
-    # Source 1: HaveIBeenPwned
     hibp = check_haveibeenpwned(email)
     if hibp.get('found'):
         results['breaches_found'].extend(hibp.get('breaches', []))
@@ -61,7 +57,6 @@ def check_multiple_breach_sources(email):
             'count': 0
         })
     
-    # Source 2: LeakCheck
     leakcheck = check_leakcheck(email)
     if leakcheck.get('found'):
         results['details'].append({
@@ -77,13 +72,12 @@ def check_multiple_breach_sources(email):
             'count': 0
         })
     
-    # Source 3: DeHashed
     dehashed = check_dehashed(email)
     if dehashed.get('found'):
         results['details'].append({
             'source': 'DeHashed',
             'status': '✅ Found',
-            'note': 'Premium required for full details',
+            'note': 'Premium required',
             'url': dehashed.get('url')
         })
     else:
@@ -99,7 +93,6 @@ def check_multiple_breach_sources(email):
     return results
 
 def check_haveibeenpwned(email):
-    """Check HIBP"""
     try:
         url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
         headers = {'user-agent': 'OSINT-WebApp'}
@@ -126,7 +119,6 @@ def check_haveibeenpwned(email):
         return {'error': str(e), 'found': False}
 
 def check_leakcheck(email):
-    """Check LeakCheck free API"""
     try:
         url = f"https://leakcheck.io/api/public?check={email}"
         response = requests.get(url, timeout=10)
@@ -144,11 +136,10 @@ def check_leakcheck(email):
         return {'found': False}
 
 def check_dehashed(email):
-    """Check DeHashed preview"""
     return {
         'found': False,
         'url': f"https://dehashed.com/search?query={email}",
-        'note': 'Visit manually to check'
+        'note': 'Visit manually'
     }
 
 def check_reputation(email):
@@ -170,7 +161,6 @@ def check_reputation(email):
         return {'error': 'Reputation check unavailable'}
 
 def check_paste_sites(email):
-    """Check Pastebin and paste dump sites"""
     results = {
         'pastebin_search': f'https://psbdmp.ws/api/search/{email}',
         'found_pastes': [],
@@ -198,37 +188,16 @@ def check_paste_sites(email):
     return results
 
 def check_dark_web_mentions(email):
-    """Dark web search links"""
     results = {
         'intelligence_x_url': f'https://intelx.io/?s={email}',
         'search_engines': [
-            {
-                'name': 'Intelligence X',
-                'url': f'https://intelx.io/?s={email}',
-                'description': 'Dark web search'
-            },
-            {
-                'name': 'DarkSearch',
-                'url': f'https://darksearch.io/?query={email}',
-                'description': 'Tor search'
-            },
-            {
-                'name': 'Ahmia',
-                'url': f'https://ahmia.fi/search/?q={email}',
-                'description': 'Hidden services'
-            }
+            {'name': 'Intelligence X', 'url': f'https://intelx.io/?s={email}', 'description': 'Dark web search'},
+            {'name': 'DarkSearch', 'url': f'https://darksearch.io/?query={email}', 'description': 'Tor search'},
+            {'name': 'Ahmia', 'url': f'https://ahmia.fi/search/?q={email}', 'description': 'Hidden services'}
         ],
         'leak_databases': [
-            {
-                'name': 'DeHashed',
-                'url': f'https://dehashed.com/search?query={email}',
-                'note': '$4.99/month'
-            },
-            {
-                'name': 'LeakCheck',
-                'url': f'https://leakcheck.io/search?query={email}',
-                'note': 'Free basic'
-            }
+            {'name': 'DeHashed', 'url': f'https://dehashed.com/search?query={email}', 'note': '$4.99/month'},
+            {'name': 'LeakCheck', 'url': f'https://leakcheck.io/search?query={email}', 'note': 'Free basic'}
         ],
         'note': 'Manual verification required'
     }
@@ -236,10 +205,7 @@ def check_dark_web_mentions(email):
     return results
 
 def verify_profile_exists(platform_name, url, username):
-    """Verify if profile exists - with status indicators"""
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    }
+    headers = {'User-Agent': 'Mozilla/5.0'}
     
     try:
         response = requests.get(url, headers=headers, timeout=5, allow_redirects=True)
@@ -262,15 +228,9 @@ def verify_profile_exists(platform_name, url, username):
             'status': 'found' if exists else ('not_found' if exists == False else 'check_manually')
         }
     except:
-        return {
-            'name': platform_name,
-            'url': url,
-            'exists': None,
-            'status': 'error'
-        }
+        return {'name': platform_name, 'url': url, 'exists': None, 'status': 'error'}
 
 def check_social_media_verified(username):
-    """Check social media with auto-verification"""
     platforms = [
         {'name': 'GitHub', 'url': f'https://github.com/{username}'},
         {'name': 'Reddit', 'url': f'https://reddit.com/user/{username}'},
@@ -289,10 +249,7 @@ def check_social_media_verified(username):
     verified_platforms = []
     
     with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = {
-            executor.submit(verify_profile_exists, p['name'], p['url'], username): p 
-            for p in platforms
-        }
+        futures = {executor.submit(verify_profile_exists, p['name'], p['url'], username): p for p in platforms}
         
         for future in as_completed(futures):
             result = future.result()
@@ -308,7 +265,6 @@ def check_social_media_verified(username):
     }
 
 def check_username_sites_verified(username):
-    """Verify username across sites"""
     sites = [
         {'name': 'Stack Overflow', 'url': f'https://stackoverflow.com/users/{username}'},
         {'name': 'Keybase', 'url': f'https://keybase.io/{username}'},
@@ -319,10 +275,7 @@ def check_username_sites_verified(username):
     
     verified_sites = []
     with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = {
-            executor.submit(verify_profile_exists, s['name'], s['url'], username): s 
-            for s in sites
-        }
+        futures = {executor.submit(verify_profile_exists, s['name'], s['url'], username): s for s in sites}
         
         for future in as_completed(futures):
             result = future.result()
@@ -357,32 +310,19 @@ def extract_potential_names(username):
     if '.' in username:
         parts = username.split('.')
         if len(parts) == 2:
-            potential_names.append({
-                'type': 'firstname.lastname',
-                'first': parts[0].capitalize(),
-                'last': parts[1].capitalize()
-            })
+            potential_names.append({'type': 'firstname.lastname', 'first': parts[0].capitalize(), 'last': parts[1].capitalize()})
     
     if '_' in username:
         parts = username.split('_')
         if len(parts) == 2:
-            potential_names.append({
-                'type': 'first_last',
-                'first': parts[0].capitalize(),
-                'last': parts[1].capitalize()
-            })
+            potential_names.append({'type': 'first_last', 'first': parts[0].capitalize(), 'last': parts[1].capitalize()})
     
     numbers = re.findall(r'\d+', username)
     if numbers:
-        potential_names.append({
-            'type': 'username_with_numbers',
-            'username_base': re.sub(r'\d+', '', username),
-            'numbers': numbers,
-            'note': 'Numbers might be birth year, age, or dates'
-        })
+        potential_names.append({'type': 'username_with_numbers', 'username_base': re.sub(r'\d+', '', username), 'numbers': numbers, 'note': 'Numbers might be birth year, age, or dates'})
     
     return potential_names if potential_names else [{'note': 'No obvious name patterns detected'}]
 
 def generate_google_dorks(email):
-    """Use new UK/EU focused Google search with previews"""
+    from app.google_search import generate_google_dorks_with_preview
     return generate_google_dorks_with_preview(email, is_email=True)
