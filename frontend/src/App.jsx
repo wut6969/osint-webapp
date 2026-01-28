@@ -109,7 +109,6 @@ function App() {
               )}
             </div>
 
-            {/* Name Results */}
             {results.name_results && (
               <>
                 {results.name_results.email_match && (
@@ -131,8 +130,8 @@ function App() {
                     <h3>📧 Potential Emails</h3>
                     <p className="detail">{results.name_results.potential_emails.note}</p>
                     <div className="email-list">
-                      {results.name_results.potential_emails.patterns.map((email, i) => (
-                        <div key={i} className="email-item">{email}</div>
+                      {results.name_results.potential_emails.patterns.map((emailAddr, i) => (
+                        <div key={i} className="email-item">{emailAddr}</div>
                       ))}
                     </div>
                   </div>
@@ -203,9 +202,26 @@ function App() {
                   <div className="section">
                     <h3>📋 Public Records</h3>
                     <p className="warning">{results.name_results.public_records.warning}</p>
+                    
+                    {results.name_results.public_records.verified_count > 0 && (
+                      <div className="stats success">
+                        ✅ Found results in {results.name_results.public_records.verified_count} databases
+                      </div>
+                    )}
+                    
                     <div className="platform-grid">
                       {results.name_results.public_records.databases.map((db, i) => (
-                        <div key={i} className="platform-card">
+                        <div key={i} className={`platform-card verification-${db.verification_status || 'not_checked'}`}>
+                          <div className="verification-header">
+                            <span className="status-icon">{db.status_icon || '⏳'}</span>
+                            <span className="status-text">
+                              {db.verification_status === 'found' && 'Results Found'}
+                              {db.verification_status === 'not_found' && 'No Results'}
+                              {db.verification_status === 'check_manually' && 'Check Manually'}
+                              {db.verification_status === 'error' && 'Error'}
+                              {(!db.verification_status || db.verification_status === 'not_checked') && 'Not Checked'}
+                            </span>
+                          </div>
                           <a href={db.url} target="_blank" rel="noopener noreferrer">
                             {db.name}
                           </a>
@@ -257,7 +273,6 @@ function App() {
               </>
             )}
 
-            {/* Email Results */}
             {results.email_results && (
               <>
                 {results.email_results.reputation && !results.email_results.reputation.error && (

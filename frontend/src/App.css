@@ -622,3 +622,89 @@ button:disabled {
 .breach-sources {
   margin-bottom: 20px;
 }
+
+.verification-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.status-icon {
+  font-size: 1.2rem;
+}
+
+.status-text {
+  color: #a0a0b0;
+  font-weight: 600;
+}
+
+.platform-card.verification-found {
+  border: 2px solid #4caf50;
+  background: #1f4d2f;
+}
+
+.platform-card.verification-not_found {
+  border: 2px solid #6a6f8a;
+  background: #2a2f4a;
+  opacity: 0.7;
+}
+
+.platform-card.verification-check_manually {
+  border: 2px solid #ffc107;
+  background: #4d3d1f;
+}
+
+.platform-card.verification-error {
+  border: 2px solid #ff6b6b;
+  background: #4d1f1f;
+  opacity: 0.6;
+}
+
+.platform-card.verification-not_checked {
+  border: 2px solid #3a3f5a;
+}
+
+.verification-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.status-icon {
+  font-size: 1.2rem;
+}
+
+.status-text {
+  color: #a0a0b0;
+  font-weight: 600;
+}
+
+.platform-card.verification-found {
+  border: 2px solid #4caf50;
+  background: #1f4d2f;
+}
+
+.platform-card.verification-not_found {
+  border: 2px solid #6a6f8a;
+  background: #2a2f4a;
+  opacity: 0.7;
+}
+
+.platform-card.verification-check_manually {
+  border: 2px solid #ffc107;
+  background: #4d3d1f;
+}
+
+.platform-card.verification-error {
+  border: 2px solid #ff6b6b;
+  background: #4d1f1f;
+  opacity: 0.6;
+}
+
+.platform-card.verification-not_checked {
+  border: 2px solid #3a3f5a;
+}
